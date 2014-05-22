@@ -62,7 +62,6 @@ setup(service      = ["OpenERPServerService"],
       author_email = meta['author_email'],
       data_files   = generate_files(),
       options      = {"py2exe": {
-                        "excludes": excludes,
                         "skip_archive": 1,
                         "optimize": 2,
                      }},
