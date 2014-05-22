@@ -1,0 +1,53 @@
+#create the install directory for OpenERP
+sudo mkdir /opt/openerp
+sudo chown ubuntu /opt/openerp
+sudo chgrp ubuntu /opt/openerp
+cd /opt/openerp
+
+#install PostgreSQL
+yes | sudo apt-get install postgresql
+
+#create a postgres user for OpenERP
+sudo su postgres
+createuser -s -e ubuntu
+exit
+
+#install Python dependencies
+yes | sudo apt-get install python-dateutil python-docutils python-feedparser python-jinja2 python-ldap python-libxslt1 python-lxml python-mako python-mock python-openid python-psycopg2 python-psutil python-pybabel python-pychart python-pydot python-pyparsing python-reportlab python-simplejson python-tz python-unittest2 python-vatnumber python-vobject python-webdav python-werkzeug python-xlwt python-yaml python-zsi poppler-utils
+
+#install GDATA
+wget http://gdata-python-client.googlecode.com/files/gdata-2.0.17.tar.gz
+tar zxvf gdata-2.0.17.tar.gz
+cd gdata-2.0.17/
+sudo python setup.py install
+cd ..
+
+#install bazaar
+yes | sudo apt-get install bzr
+yes | sudo apt-get install bzrtools
+
+#install the three OpenERP branches
+bzr co lp:openerp-web/7.0 web
+bzr co lp:openobject-server/7.0 server
+bzr co lp:openobject-addons/7.0 addons
+
+#setup logfile
+sudo mkdir /var/log/openerp
+sudo chown ubuntu:root /var/log/openerp
+
+#setup configuration file
+sudo cp /opt/openerp/server/install/openerp-server.conf /etc/
+sudo chown ubuntu: /etc/openerp-server.conf
+sudo chmod 640 /etc/openerp-server.conf
+sudo sed -i” ‘s/db_user = .*/db_user = ubuntu/g’ /etc/openerp-server.conf
+sudo echo “logfile = /var/log/openerp/openerp-server.log” >> /etc/openerp-server.conf
+sudo echo “addons_path=/opt/openerp/addons,/opt/openerp/web/addons” >> /etc/openerp-server.conf
+
+#setup auto-startup
+cd /etc/init.d
+sudo curl -O http://174.129.226.169/openerp_config/openerp-server
+sudo sed -i” ‘s/USER=.*/USER=ubuntu/g’ /etc/init.d/openerp-server
+sudo chmod 755 /etc/init.d/openerp-server
+sudo chown root: /etc/init.d/openerp-server
+sudo update-rc.d openerp-server defaults
+sudo /etc/init.d/openerp-server start
